@@ -44,7 +44,6 @@ import           Data.Monoid           ((<>))
 import           Data.Text as T
 import           Data.Time.Clock.POSIX
 import           System.IO.Unsafe
-import qualified System.Random         as R
 
 import           Data.Binary.Roll
 import           Data.ULID.Random
@@ -88,14 +87,6 @@ instance Binary ULID where
 -- it's no harm to leave it in.
 instance NFData ULID where
     rnf (ULID ts bytes) = rnf ts `seq` (rnf bytes `seq` ())
-
-instance R.Random ULID where
-    randomR _ = R.random -- ignore range
-    random g = unsafePerformIO $ do
-        t <- getULIDTimeStamp
-        let (r, g') = mkULIDRandom g
-        return (ULID t r, g')
-    randomIO = getULID
 
 instance Hashable ULID where
     hashWithSalt salt ulid = hashWithSalt salt (encode ulid)
